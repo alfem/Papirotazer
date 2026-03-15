@@ -1,12 +1,13 @@
 #include <FastLED.h>
 
 #define LED_PIN     6          // Cable verde al Pin 6
-#define NUM_LEDS    60         // Tu tira de 30 LEDs
+#define NUM_LEDS    80         // Tu tira EDs
 #define BRIGHTNESS  50         
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
 
 #define IR_PIN 8
+#define BUZZER_PIN 13          // Buzzer activo en Pin 13
 
 // --- COLORES Y TIEMPOS CONFIGURABLES ---
 #define COLOR_INICIO   CRGB::Green   // Color del LED mientras espera (posición 0)
@@ -19,13 +20,31 @@
 CRGB leds[NUM_LEDS];
 int record = -1;                     // Posición más alta alcanzada (-1 = sin récord)
 
+// --- TONADILLA DE RÉCORD ---
+void tocarRecord() {
+  // Melodía graciosa tipo "¡has ganado!"
+  int notas[]    = {523, 659, 784, 1047, 784, 1047}; // Do Mi Sol Do Sol Do (C5 E5 G5 C6 G5 C6)
+  int duracion[] = {100, 100, 100, 200,  100, 300};   // duración de cada nota en ms
+  int pausas[]   = { 30,  30,  30,  50,   30,   0};   // silencio entre notas
+
+  int numNotas = sizeof(notas) / sizeof(notas[0]);
+  for (int n = 0; n < numNotas; n++) {
+    tone(BUZZER_PIN, notas[n]);
+    delay(duracion[n]);
+    noTone(BUZZER_PIN);
+    if (pausas[n] > 0) delay(pausas[n]);
+  }
+}
+
 void setup() {
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.clear();
   FastLED.show();
 
-  pinMode(IR_PIN, INPUT); 
+  pinMode(IR_PIN, INPUT);
+  // Buzzer pasivo: no necesita pinMode explícito con tone()
+  noTone(BUZZER_PIN);             // Asegura que empieza en silencio
   
 }
 
@@ -54,6 +73,10 @@ void loop() {
       lastSensor = sensorNow;
       ultimoCambio = millis();          // Reinicia el contador de inactividad
 
+      // Frecuencia ascendente según posición (200 Hz en LED 0 → 2000 Hz en LED final)
+      int freqSubida = map(pos, 0, NUM_LEDS - 1, 200, 2000);
+      tone(BUZZER_PIN, freqSubida);
+
       leds[pos] = CRGB::Black;           // Apaga el LED actual
       pos++;
 
@@ -71,7 +94,9 @@ void loop() {
 
       leds[pos] = COLOR_AVANCE;          // LED avanzante encima del récord si coinciden
       FastLED.show();
-      delay(30);                          // Pausa corta para estabilizar
+      delay(20);                          // Duración del pitido (ms)
+      noTone(BUZZER_PIN);               // Apaga el tono
+      delay(10);                          // Pausa de silencio entre pitidos
     }
 
     // Si no hay cambio durante INACTIVIDAD_MS, inicia el retroceso
@@ -87,7 +112,8 @@ void loop() {
   }
 
   // Actualiza el récord real si se ha superado
-  if (pos > record) {
+  bool nuevoRecord = (pos > record);
+  if (nuevoRecord) {
     record = pos;
   }
   // El récord vuelve a su posición real (fin del empuje)
@@ -97,6 +123,12 @@ void loop() {
   leds[pos] = COLOR_FINAL;
   if (record >= 0 && record != pos) leds[record] = COLOR_RECORD;
   FastLED.show();
+
+  // Si hay nuevo récord, celebrar con la tonadilla
+  if (nuevoRecord) {
+    tocarRecord();
+  }
+
   delay(500); // Pausa breve con el LED final encendido
 
   // --- FASE 2: VOLVER HACIA ATRÁS ---
@@ -112,7 +144,14 @@ void loop() {
     if (record >= 0 && i != record && (i + 1) != record) leds[record] = COLOR_RECORD;
 
     FastLED.show();
-    delay(10);
+
+    // Frecuencia descendente según posición (2000 Hz arriba → 200 Hz en LED 0)
+    int freqBajada = map(i, 0, NUM_LEDS - 1, 200, 2000);
+    tone(BUZZER_PIN, freqBajada);   // Tono continuo, solo cambia frecuencia
+
+    delay(20);
+    noTone(BUZZER_PIN);               // Apaga el tono
+    delay(10);                          // Pausa de silencio entre pitidos
   }
 
   delay(1000); // Pausa antes de reiniciar
