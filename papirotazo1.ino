@@ -36,6 +36,25 @@ void tocarRecord() {
   }
 }
 
+// --- MELODÍA DE RISA (trombón triste) ---
+void tocarRisa() {
+  // Glissando descendente tipo "trombón triste"
+  for (int f = 622; f >= 220; f -= 4) {
+    tone(BUZZER_PIN, f);
+    delay(5);
+  }
+  noTone(BUZZER_PIN);
+  delay(80);
+  // Tres golpecitos finales cómicos
+  int golpes[] = {262, 247, 220};
+  for (int n = 0; n < 3; n++) {
+    tone(BUZZER_PIN, golpes[n]);
+    delay(100);
+    noTone(BUZZER_PIN);
+    delay(40);
+  }
+}
+
 void setup() {
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(BRIGHTNESS);
@@ -128,6 +147,8 @@ void loop() {
   // Si hay nuevo récord, celebrar con la tonadilla
   if (nuevoRecord) {
     tocarRecord();
+  } else if (pos >0 and pos <= 10) {
+    tocarRisa();  // ¡Qué poco has llegado!
   }
 
   delay(500); // Pausa breve con el LED final encendido
