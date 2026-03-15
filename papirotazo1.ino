@@ -1,7 +1,7 @@
 #include <FastLED.h>
 
 #define LED_PIN     6          // Cable verde al Pin 6
-#define NUM_LEDS    80         // Tu tira EDs
+#define NUM_LEDS    144         // Tu tira EDs
 #define BRIGHTNESS  50         
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
@@ -54,7 +54,6 @@ void loop() {
   // Cuando el sensor deja de cambiar, se detiene y deja ese LED encendido.
 
   int pos = 0;                          // Posición actual del LED
-  int lastSensor = digitalRead(IR_PIN); // Estado inicial del sensor
   int recordMostrado = record;          // Posición visual del récord (puede desplazarse)
 
   // Enciende el primer LED (color de inicio) y espera a que haya movimiento
@@ -62,8 +61,10 @@ void loop() {
   if (record >= 0) leds[recordMostrado] = COLOR_RECORD;
   FastLED.show();
 
-  // Bucle de avance: sigue mientras no hayamos llegado al final
+  // Lee el sensor JUSTO antes del bucle, para no perder golpes durante la inicialización
+  int lastSensor = digitalRead(IR_PIN);
   unsigned long ultimoCambio = millis(); // Marca de tiempo del último cambio detectado
+
 
   while (pos < NUM_LEDS - 1) {
     int sensorNow = digitalRead(IR_PIN);
