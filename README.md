@@ -4,7 +4,8 @@ Seguro que has visto en alguna feria ese juego donde, a cambio de una moneda, po
 
 Papirotazer es la versión portable y para todos los públicos de este juego. Compite para saber quien tiene más fuerza en su dedo índice, dando un *papirotazo* (o *chorlito*, *capirotazo*, *tincazo*, *chiclazo*...) a la diana giratoria.
 
-![El papirotazer](https://raw.githubusercontent.com/alfem/Papirotazer/refs/heads/main/images/papirotazer1.jpg)
+<img src="https://raw.githubusercontent.com/alfem/Papirotazer/refs/heads/main/images/papirotazer1.jpg" width=30%><img src="https://raw.githubusercontent.com/alfem/Papirotazer/refs/heads/main/images/papirotazer2.jpg" width=30%>
+
 
 # COMO HACERLO
 
@@ -19,4 +20,6 @@ Si quieres hacerte el tuyo, necesitarás:
 * Conectores tipo dupont
 * Una fuente de alimentación con su cable
 
-![Pon a prueba tu índice](https://raw.githubusercontent.com/alfem/Papirotazer/refs/heads/main/images/papirotazer2.jpg)
+
+
+<img src="https://raw.githubusercontent.com/alfem/Papirotazer/refs/heads/main/images/papirotazer3.jpg"  width=50%>
