@@ -1,7 +1,8 @@
 #include <FastLED.h>
 
 #define LED_PIN     6          // Cable verde al Pin 6
-#define NUM_LEDS    144         // Tu tira EDs
+#define NUM_LEDS    60         // Tu tira LED
+//#define NUM_LEDS    144         // Tu tira LED
 #define BRIGHTNESS  50         
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
