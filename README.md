@@ -10,13 +10,13 @@ Papirotazer es la versión portable y para todos los públicos de este juego. Co
 
 Si quieres hacerte el tuyo, necesitarás:
 
-* Una placa Arduino UNO
-* Una tira led 
+* Una placa Arduino UNO (o similar)
+* Una tira led (tipo WS2812B, para poder encender iluminar cada LED por separado)
 * Un sensor de distancia por infrarojos
 * Un zumbador pasivo
-* Tubos de PVC para el armazón (también puedes hacerlo de madera)
-* Una impresora 3d si quieres hacer la diana a medida
-* Conectores tipo dupont
+* Tubos de PVC para el armazón (también puedes hacerlo de cartón o de madera)
+* Unos palos de helado y unas arandelas, o una impresora 3d si quieres hacer la diana giratoria a medida
+* Cablebitos con conectores tipo Dupont
 * Una fuente de alimentación con su cable
 
 ![Pon a prueba tu índice](https://raw.githubusercontent.com/alfem/Papirotazer/refs/heads/main/images/papirotazer2.jpg)
