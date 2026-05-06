@@ -3,7 +3,7 @@
 #define LED_PIN     6          // Cable verde al Pin 6
 #define NUM_LEDS    60         // Tu tira LED
 //#define NUM_LEDS    144         // Tu tira LED
-#define PULSOS_POR_LED  3            // Pulsos del sensor necesarios para avanzar 1 LED (calibración de fuerza)
+#define PULSOS_POR_LED  4            // Pulsos del sensor necesarios para avanzar 1 LED (calibración de fuerza)
 #define BRIGHTNESS  50         
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
@@ -57,6 +57,17 @@ void tocarRisa() {
   }
 }
 
+// --- SEÑAL DE "LISTO" ---
+// Chirp ascendente que indica al jugador que puede golpear el aspa.
+// El sensor se empieza a leer JUSTO después de este sonido.
+void tocarListo() {
+  for (int f = 400; f <= 1600; f += 40) {
+    tone(BUZZER_PIN, f);
+    delay(3);
+  }
+  noTone(BUZZER_PIN);
+}
+
 void setup() {
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(BRIGHTNESS);
@@ -78,14 +89,16 @@ void loop() {
   int recordMostrado = record;          // Posición visual del récord (puede desplazarse)
   int contadorPulsos = 0;              // Cuenta pulsos del sensor; avanza LED cada PULSOS_POR_LED
 
-  // Enciende el primer LED (color de inicio) y espera a que haya movimiento
+  // Enciende el primer LED y toca la señal de inicio
   leds[pos] = COLOR_INICIO;
   if (record >= 0) leds[recordMostrado] = COLOR_RECORD;
   FastLED.show();
 
-  // Lee el sensor JUSTO antes del bucle, para no perder golpes durante la inicialización
+  //tocarListo();   // <- señal audible: a partir de aquí se lee el sensor
+
+  // Lee el sensor JUSTO después de la señal de listo
   int lastSensor = digitalRead(IR_PIN);
-  unsigned long ultimoCambio = millis(); // Marca de tiempo del último cambio detectado
+  unsigned long ultimoCambio = millis();
 
 
   while (pos < NUM_LEDS - 1) {
@@ -163,32 +176,30 @@ void loop() {
   delay(500); // Pausa breve con el LED final encendido
 
   // --- FASE 2: VOLVER HACIA ATRÁS ---
+  // El sensor se ignora completamente durante el retroceso y el cooldown.
+  // El jugador debe esperar a la señal de "listo" antes de golpear.
   for (int i = pos - 1; i >= 0; i--) {
-    leds[i]   = COLOR_RETORNO;         // Enciende el LED actual (color de retorno)
-    leds[i+1] = CRGB::Black;          // Apaga el anterior
+    leds[i]   = COLOR_RETORNO;
+    leds[i+1] = CRGB::Black;
 
-    // Mantiene el LED fijo en 'pos' con el color final durante toda la vuelta
-    if (i == pos - 1) {
-      leds[pos] = COLOR_FINAL;
-    }
-    // Mantiene el récord visible durante el retroceso
+    if (i == pos - 1) leds[pos] = COLOR_FINAL;
     if (record >= 0 && i != record && (i + 1) != record) leds[record] = COLOR_RECORD;
 
     FastLED.show();
 
-    // Frecuencia descendente según posición (2000 Hz arriba → 200 Hz en LED 0)
     int freqBajada = map(i, 0, NUM_LEDS - 1, 200, 2000);
-    tone(BUZZER_PIN, freqBajada);   // Tono continuo, solo cambia frecuencia
-
+    tone(BUZZER_PIN, freqBajada);
     delay(20);
-    noTone(BUZZER_PIN);               // Apaga el tono
-    delay(10);                          // Pausa de silencio entre pitidos
+    noTone(BUZZER_PIN);
+    delay(10);
   }
+  noTone(BUZZER_PIN);
 
-  delay(1000); // Pausa antes de reiniciar
-  FastLED.clear();                     // Apaga todos los LEDs...
-  if (record >= 0) {
-    leds[record] = COLOR_RECORD;       // ...excepto el del récord
-  }
+  // Cooldown: muestra el resultado final antes de la próxima ronda
+  delay(1000);
+
+  FastLED.clear();
+  if (record >= 0) leds[record] = COLOR_RECORD;
   FastLED.show();
+  // La señal de "listo" suena al inicio del siguiente loop(), justo antes de leer el sensor
 }
