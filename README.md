@@ -19,3 +19,4 @@ Si quieres hacerte el tuyo, necesitarás:
 * Conectores tipo dupont
 * Una fuente de alimentación con su cable
 
+![Pon a prueba tu índice](https://raw.githubusercontent.com/alfem/Papirotazer/refs/heads/main/images/papirotazer2.jpg)
