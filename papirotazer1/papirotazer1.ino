@@ -3,6 +3,7 @@
 #define LED_PIN     6          // Cable verde al Pin 6
 #define NUM_LEDS    60         // Tu tira LED
 //#define NUM_LEDS    144         // Tu tira LED
+#define PULSOS_POR_LED  3            // Pulsos del sensor necesarios para avanzar 1 LED (calibración de fuerza)
 #define BRIGHTNESS  50         
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
@@ -75,6 +76,7 @@ void loop() {
 
   int pos = 0;                          // Posición actual del LED
   int recordMostrado = record;          // Posición visual del récord (puede desplazarse)
+  int contadorPulsos = 0;              // Cuenta pulsos del sensor; avanza LED cada PULSOS_POR_LED
 
   // Enciende el primer LED (color de inicio) y espera a que haya movimiento
   leds[pos] = COLOR_INICIO;
@@ -90,34 +92,40 @@ void loop() {
     int sensorNow = digitalRead(IR_PIN);
 
     if (sensorNow != lastSensor) {
-      // Se detectó un cambio en el sensor → avanzar un LED
+      // Se detectó un cambio en el sensor
       lastSensor = sensorNow;
       ultimoCambio = millis();          // Reinicia el contador de inactividad
+      contadorPulsos++;
 
-      // Frecuencia ascendente según posición (200 Hz en LED 0 → 2000 Hz en LED final)
-      int freqSubida = map(pos, 0, NUM_LEDS - 1, 200, 2000);
-      tone(BUZZER_PIN, freqSubida);
+      // Solo avanza el LED cada PULSOS_POR_LED pulsos (factor de calibración)
+      if (contadorPulsos >= PULSOS_POR_LED) {
+        contadorPulsos = 0;
 
-      leds[pos] = CRGB::Black;           // Apaga el LED actual
-      pos++;
+        // Frecuencia ascendente según posición (200 Hz en LED 0 → 2000 Hz en LED final)
+        int freqSubida = map(pos, 0, NUM_LEDS - 1, 200, 2000);
+        tone(BUZZER_PIN, freqSubida);
 
-      // --- Lógica del empuje del récord ---
-      if (record >= 0) {
-        // Cuando el LED avanzante alcanza al récord, lo empuja una posición adelante
-        if (pos >= recordMostrado && recordMostrado < NUM_LEDS - 1) {
-          leds[recordMostrado] = CRGB::Black; // Borra la posición anterior del récord
-          recordMostrado = pos + 1;            // Empuja el récord una posición por delante
-          leds[recordMostrado] = COLOR_RECORD;
-        } else if (pos != recordMostrado) {
-          leds[recordMostrado] = COLOR_RECORD; // Mantiene el récord visible si no hay solapamiento
+        leds[pos] = CRGB::Black;           // Apaga el LED actual
+        pos++;
+
+        // --- Lógica del empuje del récord ---
+        if (record >= 0) {
+          // Cuando el LED avanzante alcanza al récord, lo empuja una posición adelante
+          if (pos >= recordMostrado && recordMostrado < NUM_LEDS - 1) {
+            leds[recordMostrado] = CRGB::Black; // Borra la posición anterior del récord
+            recordMostrado = pos + 1;            // Empuja el récord una posición por delante
+            leds[recordMostrado] = COLOR_RECORD;
+          } else if (pos != recordMostrado) {
+            leds[recordMostrado] = COLOR_RECORD; // Mantiene el récord visible si no hay solapamiento
+          }
         }
-      }
 
-      leds[pos] = COLOR_AVANCE;          // LED avanzante encima del récord si coinciden
-      FastLED.show();
-      delay(20);                          // Duración del pitido (ms)
-      noTone(BUZZER_PIN);               // Apaga el tono
-      delay(10);                          // Pausa de silencio entre pitidos
+        leds[pos] = COLOR_AVANCE;          // LED avanzante encima del récord si coinciden
+        FastLED.show();
+        delay(20);                          // Duración del pitido (ms)
+        noTone(BUZZER_PIN);               // Apaga el tono
+        delay(10);                          // Pausa de silencio entre pitidos
+      }
     }
 
     // Si no hay cambio durante INACTIVIDAD_MS, inicia el retroceso
