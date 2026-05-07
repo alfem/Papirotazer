@@ -17,7 +17,7 @@ Si quieres hacerte el tuyo, necesitarás:
 * Un zumbador pasivo
 * Tubos de PVC para el armazón (también puedes hacerlo de cartón o de madera)
 * Unos palos de helado y unas arandelas, o una impresora 3d si quieres hacer la diana giratoria a medida
-* Cablebitos con conectores tipo Dupont
+* Cablecitos con conectores tipo Dupont
 * Una fuente de alimentación con su cable
 
 
